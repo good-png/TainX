@@ -1,0 +1,937 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <title>타인 X의 초상</title>
+  <meta name="viewport" content="width=1920, initial-scale=1.0">
+  <img src="title2.png" alt="타인 X의 초상" class="title-image" id="main-title-img" />
+
+  <style>
+    @import url('https://fonts.googleapis.com/css?family=Montserrat:100,300&display=swap');
+    html, body {
+      width: 100vw; height: 100vh; margin: 0; padding: 0;
+      background: #000;
+      color: #fff;
+      font-family: 'Helvetica Neue Ultra Light', 'Montserrat', sans-serif;
+      overflow: hidden;
+    }
+    img.title-image {
+  position: fixed;
+  top: 50px;
+  left: 27%;
+  transform: translateX(-50%);
+  width:900px;
+  height: auto;
+  display: block;
+  z-index: 0;
+  opacity: 1;
+  transition: opacity 0.7s cubic-bezier(.77,0,.18,1);
+  pointer-events: none;
+}
+img.title-image.hide {
+  opacity: 0;
+  pointer-events: none;
+}
+
+
+    #bg-canvas {
+      position: fixed; left: 0; top: 0;
+      width: 100vw; height: 100vh;
+      z-index: 0; pointer-events: none;
+    }
+    #noise {
+      pointer-events: none;
+      position: fixed; left: 0; top: 0;
+      width: 100vw; height: 100vh;
+      opacity: 0.09; z-index: 1;
+      background: url('https://www.transparenttextures.com/patterns/noise.png');
+    }
+    
+    main#app {
+      position: absolute;
+      left: 50%; top: 50%;
+      transform: translate(-50%, -50%);
+      width: 70vw; max-width: 900px;
+      min-height: 700px;
+      padding: 10vw 7vw;
+      box-sizing: border-box;
+      z-index: 2;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+    }
+    
+    .sub-text {
+      font-size: 0.7vw;
+      letter-spacing: 0.12em;
+      line-height: 1.85;
+      color: #eaeaea;
+      margin-bottom: 0.9vw;
+      margin-top: 0.4vw;
+      text-align: center;
+    }
+    button, .btn {
+      background: none;
+      color: #fff;
+      font-size: 10px;
+      margin: 0.4vw 0.7vw;
+      padding: 0.3vw 0.8vw;
+      border: none;
+      border-radius: 24px;
+      transition: background 0.2s, color 0.2s;
+      cursor: pointer;
+      outline: none;
+      min-width: 60px;
+    }
+    button:hover, .btn:hover {
+      background: #222;
+      color: #fff;
+    }
+    input[type="text"], input[type="number"], textarea, select {
+      background: #111;
+      color: #fff;
+      font-size: 0.7vw;
+      border: none;
+      border-radius: 14px;
+      padding: 0.3vw 1vw;
+      margin: 0.5vw 0;
+      width: 80%;
+      box-sizing: border-box;
+      outline: none;
+    }
+    input[type="text"]:focus, textarea:focus {
+      background: #222;
+    }
+    #camera-preview, #photo-result, #quiz-video {
+      margin: 0.7vw 0;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+    #camera-preview video, #photo-result img {
+      border-radius: 18px;
+      width: 260px;
+      height: 260px;
+      object-fit: cover;
+      filter: contrast(1.1);
+      box-shadow: 0 0 30px 0 #000a;
+    }
+    #quiz-video {
+      position: relative;
+      width: 260px;
+      height: 260px;
+      margin-bottom: 1vw;
+    }
+    #quiz-video video, #quiz-video canvas {
+      position: absolute;
+      left: 0; top: 0;
+      width: 260px; height: 260px;
+      border-radius: 18px;
+      object-fit: cover;
+      box-shadow: 0 0 30px 0 #000a;
+      background: #111;
+    }
+    #session-id-box {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 1vw;
+      margin: 1vw 0;
+    }
+    #session-id-txt {
+      font-size: 0.7vw;
+      background: #1a1a1a;
+      padding: 0.3vw 1vw;
+      border-radius: 12px;
+      letter-spacing: 0.09em;
+    }
+    #bgm-upload {
+      position: fixed; left: 2vw; bottom: 2vw; z-index: 99;
+      color: #aaa; font-size: 0.8vw;
+      background: #222; border-radius: 16px; padding: 0.5vw 1vw;
+      opacity: 0.7;
+    }
+    #bgm-upload input { display: none; }
+    .fade-in {
+      animation: fadeIn 1.2s;
+    }
+    .fade-out {
+      animation: fadeOut 1.2s;
+    }
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to   { opacity: 1; }
+    }
+    @keyframes fadeOut {
+      from { opacity: 1; }
+      to   { opacity: 0; }
+    }
+    @media (max-width: 1200px) {
+      main#app { width: 90vw; padding: 6vw 2vw; }
+      h1, .main-title { font-size: 1.7vw; }
+      .sub-text { font-size: 1vw; }
+    }
+    @media (max-width: 800px) {
+      main#app { width: 98vw; min-height: 450px; }
+      h1, .main-title { font-size: 2vw; }
+      .sub-text { font-size: 1.4vw; }
+      button, .btn { font-size: 1.4vw; }
+    }
+    .fade-out-btn {
+  opacity: 0;
+  transition: opacity 0.7s cubic-bezier(.77,0,.18,1);
+}
+  </style>
+</head>
+<body>
+  <canvas id="bg-canvas"></canvas>
+  <div id="noise"></div>
+  <main id="app"></main>
+  <label id="bgm-upload">
+  <audio src="bgm.mp3" autoplay loop controls id="myAudio"></audio>
+  <script>
+
+    // --- BG Blur Animation ---
+    const bg = document.getElementById('bg-canvas');
+    const ctx = bg.getContext('2d');
+    function resizeBg() {
+      bg.width = window.innerWidth;
+      bg.height = window.innerHeight;
+    }
+    window.addEventListener('resize', resizeBg);
+    resizeBg();
+    let circles = [
+      {x: 350, y: 250, r: 350, dx: 0.4, dy: 0.3, blur: 90},
+      {x: 1400, y: 700, r: 320, dx: -0.3, dy: 0.22, blur: 120}
+    ];
+    function animateCircles() {
+      ctx.clearRect(0, 0, bg.width, bg.height);
+      circles.forEach(c => {
+        ctx.save();
+        ctx.globalAlpha = 0.22;
+        ctx.filter = `blur(${c.blur}px)`;
+        ctx.beginPath();
+        ctx.arc(c.x, c.y, c.r, 0, 2*Math.PI);
+        ctx.fillStyle = '#fff';
+        ctx.fill();
+        ctx.restore();
+        c.x += c.dx; c.y += c.dy;
+        if (c.x < c.r || c.x > bg.width-c.r) c.dx *= -1;
+        if (c.y < c.r || c.y > bg.height-c.r) c.dy *= -1;
+      });
+      requestAnimationFrame(animateCircles);
+    }
+    animateCircles();
+
+    // --- DATA ---
+    let app = document.getElementById('app');
+    let state = { page: 'intro' };
+    let sessionData = {}; // sessionId: {aAnswers, aPhoto, aVideoBlob, poeticLine, distortedPhoto, bAnswers, bComment, lastMoshImage}
+    let currentSessionId = '';
+    let quizIdx = 0;
+
+    // --- QUESTIONS ---
+    const aQuestions = [
+      { q: "당신의 이름은 무엇인가요?", type: "text" },
+      { q: "당신의 직업은 무엇인가요?", type: "text" },
+      { q: "당신이 사는 지역은 어디인가요?", type: "text" },
+      { q: "당신은 외향적인가요, 내향적인가요?", type: "select", options: [
+        "매우 외향적","조금 외향적","중간","조금 내향적","매우 내향적","모름OR상황에 따라 다름"
+      ]},
+      { q: "편의점에서 자주 고르는 간식은?", type: "select", options: [
+        "우유","삼각김밥","초코바","라면","아이스크림","젤리"
+      ]},
+      { q: "당신의 인생은 어떤 계절과 닮았나요?", type: "select", options: [
+        "봄","여름","초여름","가을","겨울","초 겨울"
+      ]},
+      { q: "요즘 가장 자주 느끼는 감정은 무엇인가요?", type: "select", options: [
+        "슬픔","행복","화남","쓸쓸함","평화로움","불안"
+      ]},
+      { q: "요즘 나의 기분은 어떤 색인가요?", type: "select", options: [
+        "빨강","주황","노랑","초록","파랑","보라","분홍","회색","흰색","검정","갈색"
+      ]},
+      { q: "지금 내 삶에서 가장 중요한 가치는?", type: "select", options: [
+        "자유","정의","안정감","사랑","이해","우정"
+      ]},
+  
+      { q: "지금의 나를 가장 잘 표현하는 단어는?", type: "select", options: [
+        "분주함","무기력","흐릿함","생동감","잔잔함","자유로움"
+      ]}
+    ];
+    const bQuestions = [
+      { q: "이 사람의 이름은 무엇인가요?", type: "text" },
+      { q: "이 사람의 직업은 무엇인가요?", type: "text" },
+      { q: "이 사람이 사는 지역은 어디인가요?", type: "text" },
+      { q: "이 사람은 외향적인가요, 내향적인가요?", type: "select", options: [
+        "매우 외향적","조금 외향적","중간","조금 내향적","매우 내향적","모름OR상황에 따라 다름"
+      ]},
+      { q: "이 사람이 편의점에서 자주 고르는 간식은?", type: "select", options: [
+        "우유","삼각김밥","초코바","라면","아이스크림","젤리"
+      ]},
+      { q: "이 사람의 인생은 어떤 계절과 닮았나요?", type: "select", options: [
+        "봄","여름","초여름","가을","겨울","초 겨울"
+      ]},
+      { q: "이 사람이 요즘 가장 자주 느끼는 감정은 무엇일까요?", type: "select", options: [
+        "슬픔","행복","화남","쓸쓸함","평화로움","불안"
+      ]},
+      { q: "요즘 그 사람의 기분은 어떤 색일까요?", type: "select", options: [
+        "빨강","주황","노랑","초록","파랑","보라","분홍","회색","흰색","검정","갈색"
+      ]},
+      { q: "지금 그 사람 삶에서 가장 중요한 가치는?", type: "select", options: [
+        "자유","정의","안정감","사랑","이해","우정"
+      ]},
+      { q: "지금의 그 사람을 가장 잘 표현하는 단어는?", type: "select", options: [
+        "분주함","무기력","흐릿함","생동감","잔잔함","자유로움"
+      ]}
+    ];
+    function getEpilogueLines(userName) {
+  return [
+    `${userName}의 얼굴이 맞나요?`,
+    `당신은 정말로 ${userName}(을)를 알고 있나요?`,
+    `조금은 낯설지만, 이것 또한 ${userName}(이)라는 것을 부정할 수 없습니다.\n또한 낯선 타인이 되어버린 ${userName}가(이) 여전히 가깝게 느껴지죠.
+    ${userName}와 당신을 연결하고 있는 것은 무엇일까요?`
+  ];
+}
+    // --- UTILS ---
+    function randomId(n=7) {
+      const chars = 'abcdefghijklmnopqrstuvwxyz0123456789';
+      let s = '';
+      for(let i=0; i<n; ++i) s += chars[Math.floor(Math.random()*chars.length)];
+      return s;
+    }
+    function sleep(ms) { return new Promise(res=>setTimeout(res, ms)); }
+    function fadeInOut(elem, txt, ms=1700) {
+      return new Promise(async res=>{
+        elem.classList.add('fade-in');
+        elem.innerHTML = txt;
+        await sleep(ms);
+        elem.classList.remove('fade-in');
+        elem.classList.add('fade-out');
+        await sleep(600);
+        elem.classList.remove('fade-out');
+        res();
+      });
+    }
+    function copyToClipboard(txt) {
+      navigator.clipboard.writeText(txt);
+      alert("복사되었습니다: " + txt);
+    }
+
+    // --- MAIN UI FLOW ---
+    function render() {
+  // 타이틀 이미지는 intro 페이지에서만 표시
+  const titleImg = document.getElementById('main-title-img');
+  if (state.page === 'intro') {
+    if (!titleImg) {
+      // intro 페이지일 때만 타이틀 이미지 생성
+      const img = document.createElement('img');
+      img.src = 'title2.png';
+      img.alt = '타인 X의 초상';
+      img.className = 'title-image';
+      img.id = 'main-title-img';
+      document.body.appendChild(img);
+    }
+  } else {
+    // intro가 아닌 페이지에서는 타이틀 이미지 제거
+    if (titleImg) {
+      titleImg.remove();
+    }
+  }
+
+  switch(state.page) {
+    case 'intro': renderIntro(); break;
+    case 'a-prologue': renderAPrologue(); break;
+    case 'a-photo': renderAPhoto(); break;
+    case 'a-quiz': renderAQuiz(); break;
+    case 'a-finish': renderAFinish(); break;
+    case 'b-session': renderBSession(); break;
+    case 'b-quiz': renderBQuiz(); break;
+    case 'b-epilogue': renderBEpilogue(); break;
+    case 'b-result': renderBResult(); break;
+    default: renderIntro();
+  }
+}
+// 이벤트 위임: 동적으로 생성되는 버튼 클릭 처리
+document.getElementById('app').addEventListener('click', function(e) {
+  if (e.target.id === 'btn-a') {
+    e.target.disabled = true;
+    fadeOutTitleImg(() => {
+      state.page = 'a-prologue';
+      render();
+    });
+} else if (e.target.id === 'btn-b') {
+  e.target.disabled = true;
+  fadeOutTitleImg(() => {
+    // 버튼들에 fade out 효과 적용
+    const btnA = document.getElementById('btn-a');
+    const btnB = document.getElementById('btn-b');
+    
+    btnA.classList.add('fade-out-btn');
+    btnB.classList.add('fade-out-btn');
+    
+    // fade out 완료 후 세션 박스 표시
+    setTimeout(() => {
+      btnA.style.display = 'none';
+      btnB.style.display = 'none';
+      const sessionBox = document.getElementById('b-session-box');
+      sessionBox.style.display = 'flex';
+      // 세션 박스에 fade in 효과
+      sessionBox.style.opacity = '0';
+      setTimeout(() => {
+        sessionBox.style.transition = 'opacity 0.7s cubic-bezier(.77,0,.18,1)';
+        sessionBox.style.opacity = '1';
+      }, 50);
+    }, 700); // fade out 시간과 맞춤
+  });
+
+  } else if (e.target.id === 'b-session-go') {
+    let sid = document.getElementById('b-session-id').value.trim();
+    if (!sessionData[sid]) return alert('유효하지 않은 세션 아이디입니다.');
+    e.target.disabled = true;
+    fadeOutTitleImg(() => {
+      currentSessionId = sid;
+      quizIdx = 0;
+      state.page = 'b-quiz';
+      render();
+    });
+  }
+});
+    function fadeOutTitleImg(callback) {
+  const img = document.getElementById('main-title-img');
+  if (img) {
+    img.classList.add('hide');
+    setTimeout(() => {
+      img.remove();
+      if (callback) callback();
+    }, 700);
+  } else {
+    if (callback) callback();
+  }
+}
+
+    function renderIntro() {
+  state.epiIdx = 0;
+  app.innerHTML = `
+    <div style="display:flex; flex-direction:column; align-items:center; gap:2vw;">
+      <button class="btn" id="btn-a">나의 초상을 남기고 싶다면 : a</button>
+      <button class="btn" id="btn-b">그 사람의 초상을 보고 싶다면 : b</button>
+      <div id="b-session-box" style="display:none; flex-direction:column; align-items:center; gap:1vw; margin-top:2vw;">
+        <input type="text" id="b-session-id" placeholder="세션 아이디 입력" autocomplete="off">
+        <button class="btn" id="b-session-go">입장</button>
+      </div>
+    </div>
+  `;
+}
+
+    function renderAPrologue() {
+      app.innerHTML = `<div class="sub-text" id="prologue-txt"></div>
+        <button class="btn" id="skip-prologue" style="position:absolute; right:6vw; bottom:6vw;">skip</button>`;
+      let lines = [
+        "우연히 이 세계에 도착한 당신은 누구일까요?",
+        "이건 아주 작은, 당신만의 심리 탐험이에요.",
+        "당신의 말, 당신의 기억, 당신의 취향은 어쩌면 당신도 모르는 당신을 말해줄지도 몰라요.",
+        "그럼, 준비되셨나요?"
+      ];
+      let idx = 0;
+      let proTxt = document.getElementById('prologue-txt');
+      let skip = document.getElementById('skip-prologue');
+      let ended = false;
+      async function seq() {
+        for(let l of lines) {
+          if (ended) break;
+          await fadeInOut(proTxt, l, 1800);
+        }
+        if (!ended) {
+      fadeOutTitleImg(() => {
+        state.page = 'a-photo';
+        render();
+      });
+    }
+  }
+  seq();
+  skip.onclick = ()=>{
+    ended = true;
+    fadeOutTitleImg(() => {
+      state.page = 'a-photo';
+      render();
+    });
+  };
+}
+
+    // --- A 캠 촬영 및 전체 녹화 ---
+    let aStream, aRecorder, aChunks = [], aVideoBlob = null, aPhotoDataURL = null;
+    function renderAPhoto() {
+      app.innerHTML = `
+        <div class="sub-text">카메라로 얼굴을 촬영해 주세요.<br>본 프로젝트는 예술적 체험을 위한 용도입니다.</div>
+        <div id="camera-preview"></div>
+        <button class="btn" id="photo-capture">촬영동의 및 녹화시작</button>
+        <div id="photo-result"></div>
+      `;
+      let preview = document.getElementById('camera-preview');
+      let video = document.createElement('video');
+      video.autoplay = true;
+      video.playsInline = true;
+      preview.appendChild(video);
+
+      navigator.mediaDevices.getUserMedia({video:true, audio:false}).then(stream=>{
+        aStream = stream;
+        video.srcObject = stream;
+      });
+
+      document.getElementById('photo-capture').onclick = ()=>{
+        // 1. 사진 캡쳐(컬러)
+        let canvas = document.createElement('canvas');
+        canvas.width = 260; canvas.height = 260;
+        let ctx2 = canvas.getContext('2d');
+        ctx2.drawImage(video, 0, 0, 260, 260);
+        aPhotoDataURL = canvas.toDataURL();
+        document.getElementById('photo-result').innerHTML = `<img src="${aPhotoDataURL}" id="a-photo-img">`;
+
+        // 2. 녹화 시작
+        aChunks = [];
+        aRecorder = new MediaRecorder(aStream, { mimeType: "video/webm; codecs=vp8" });
+        aRecorder.ondataavailable = function(e) {
+          if (e.data.size > 0) aChunks.push(e.data);
+        };
+        aRecorder.start();
+        // 3. 다음 버튼 노출
+        setTimeout(()=>{
+          app.innerHTML += `<button class="btn" id="to-quiz" style="margin-top:2vw;">다음</button>`;
+          document.getElementById('to-quiz').onclick = ()=>{
+            aRecorder.stop();
+            aStream.getTracks().forEach(t=>t.stop());
+            // 녹화 종료 후 다음 단계
+            aRecorder.onstop = function() {
+              aVideoBlob = new Blob(aChunks, { type: "video/webm" });
+              state.aPhoto = aPhotoDataURL;
+              state.aVideoBlob = aVideoBlob;
+              state.page = 'a-quiz'; state.aAnswers = []; state.aQuizIdx = 0;
+              render();
+            };
+          };
+        }, 1000);
+      };
+    }
+
+    function renderAQuiz() {
+      let idx = state.aQuizIdx || 0;
+      let q = aQuestions[idx];
+      let html = `<div class="sub-text">${q.q}</div>`;
+      if (q.type === 'text') {
+        html += `<input type="text" id="a-answer" autocomplete="off"><br>`;
+      } else {
+        html += `<select id="a-answer"><option value="">선택하세요</option>`;
+        q.options.forEach(o=>{ html += `<option value="${o}">${o}</option>`; });
+        html += `</select><br>`;
+      }
+      html += `<button class="btn" id="a-next" style="margin-top:2vw;">다음</button>`;
+      app.innerHTML = html;
+      document.getElementById('a-next').onclick = ()=>{
+        let v = document.getElementById('a-answer').value.trim();
+        if (!v) return alert("답변을 입력해 주세요.");
+        state.aAnswers = state.aAnswers || [];
+        state.aAnswers[idx] = v;
+        if (idx < aQuestions.length-1) {
+          state.aQuizIdx = idx+1; render();
+        } else {
+          // Save session
+          let sid = randomId();
+          sessionData[sid] = {
+            aAnswers: state.aAnswers.slice(),
+            aPhoto: state.aPhoto,
+            aVideoBlob: state.aVideoBlob
+          };
+          currentSessionId = sid;
+          // Generate poetic line (AI API 연동 대신 랜덤 조합)
+          let poeticLine = generatePoeticLine(state.aAnswers);
+          sessionData[sid].poeticLine = poeticLine;
+          state.page = 'a-finish'; render();
+        }
+      };
+    }
+
+    function generatePoeticLine(answers) {
+      // 실제 서비스에선 OpenAI 등 API 연동, 여기선 랜덤 조합
+      const moods = [
+        "낡은 필름 사진 속 흐릿한 미소", "바람 빠진 풍선에 다시 숨을 불어넣는 사람",
+        "햇빛 아래에서 뛰노는 비눗방울", "오래된 책갈피에 남겨진 작은 꽃잎",
+        "창밖을 바라보는 오후의 구름", "한겨울 새벽의 투명한 공기",
+        "어디론가 흘러가는 강물", "밤하늘에 떠 있는 작은 별", "창가에 앉은 고양이",
+        "새벽녘 안개 속을 걷는 이", "비 내리는 오후의 창가", "불 꺼진 방 안의 잔상",
+        "빛바랜 사진 속의 미소", "조용한 바람결에 흩날리는 기억",
+        "화려하게 번지는 오로라", "붉은 석양에 잠긴 바다"
+      ];
+      const endings = [
+        "정확히 보이지 않아도, 이상하게 오래 기억에 남는.",
+        "예측 불가하지만, 그래서 더 웃기고 특별한.",
+        "오래 머물진 않아도, 언제나 기억나는 즐거움.",
+        "시간이 지나도 색이 바래지 않는.",
+        "잠시 스쳐가도 잊혀지지 않는 온기.",
+        "차갑지만, 그래서 더 선명한.",
+        "흐릿하지만, 그래서 더 아름다운.",
+        "가끔은 낯설지만, 그래서 더 소중한.",
+        "어딘가 익숙하면서도 낯선, 그래서 계속 바라보게 되는.",
+        "기억의 저편에서 흐릿하게 남아 있는.",
+        "소리 없이 스며드는 따뜻함.",
+        "빛과 그림자가 뒤섞인 순간."
+      ];
+      let m = moods[Math.floor(Math.random()*moods.length)];
+      let e = endings[Math.floor(Math.random()*endings.length)];
+      return `당신은 ${m} 같아요.<br>${e}`;
+    }
+
+    function renderAFinish() {
+      let sid = currentSessionId;
+      let poetic = sessionData[sid].poeticLine;
+      app.innerHTML = `
+        <div class="sub-text fade-in" style="margin-bottom:2vw;">${poetic}</div>
+        <div id="session-id-box">
+          <span id="session-id-txt">${sid}</span>
+          <button class="btn" id="copy-session">복사</button>
+        </div>
+        <div class="sub-text" style="margin-bottom:2vw;">지인에게 세션 아이디를 전달해 퀴즈에 초대해 주세요.</div>
+        <button class="btn" id="to-home">처음으로 돌아가기</button>
+      `;
+      document.getElementById('copy-session').onclick = ()=>{
+        copyToClipboard(sid);
+      };
+      document.getElementById('to-home').onclick = ()=>{
+        state = {page:'intro'}; render();
+      };
+    }
+
+    function renderBSession() {
+      app.innerHTML = `
+        <div class="sub-text">세션 아이디를 입력해 주세요.</div>
+        <input type="text" id="b-session-id" placeholder="세션 아이디 입력" autocomplete="off">
+        <button class="btn" id="b-session-go">입장</button>
+        <button class="btn" id="to-home">처음으로 돌아가기</button>
+      `;
+      document.getElementById('b-session-go').onclick = ()=>{
+        let sid = document.getElementById('b-session-id').value.trim();
+        if (!sessionData[sid]) return alert("유효하지 않은 세션 아이디입니다.");
+        currentSessionId = sid;
+        quizIdx = 0;
+        state.page = 'b-quiz'; render();
+      };
+      document.getElementById('to-home').onclick = ()=>{
+    fadeOutTitleImg(() => {
+      state = {page:'intro'};
+      render();
+    });
+  };
+}
+
+    // --- B 퀴즈: 영상 재생 + 오답시 누적 data mosh ---
+    let moshFrameBuffer = null;
+    let moshSteps = []; // 오답마다 누적된 변형 스냅샷
+    function renderBQuiz() {
+      let sid = currentSessionId;
+      let bAnswers = sessionData[sid].bAnswers || [];
+      let idx = quizIdx;
+      let q = bQuestions[idx];
+      let html = `
+        <div id="quiz-video"></div>
+        <div class="sub-text">${q.q}</div>
+      `;
+      if (q.type === 'text') {
+        html += `<input type="text" id="b-answer" value="${bAnswers[idx]||''}" autocomplete="off"><br>`;
+      } else {
+        html += `<select id="b-answer"><option value="">선택하세요</option>`;
+        q.options.forEach(o=>{
+          html += `<option value="${o}" ${bAnswers[idx]===o?'selected':''}>${o}</option>`;
+        });
+        html += `</select><br>`;
+      }
+      html += `<button class="btn" id="b-next" style="margin-top:2vw;">다음</button>`;
+      app.innerHTML = html;
+
+      // 영상 표시
+      let videoDiv = document.getElementById('quiz-video');
+      let aVideoBlob = sessionData[sid].aVideoBlob;
+      let videoURL = URL.createObjectURL(aVideoBlob);
+      let video = document.createElement('video');
+      video.src = videoURL;
+      video.autoplay = true;
+      video.muted = true;
+      video.loop = true;
+      video.playsInline = true;
+      video.style.display = "none";
+      videoDiv.appendChild(video);
+
+      let canvas = document.createElement('canvas');
+      canvas.width = 260; canvas.height = 260;
+      canvas.style.display = "block";
+      videoDiv.appendChild(canvas);
+      let ctx = canvas.getContext('2d');
+
+      // 누적 왜곡 레벨 관리
+      if (typeof sessionData[sid].moshLevel === "undefined") sessionData[sid].moshLevel = 0;
+      let moshLevel = sessionData[sid].moshLevel;
+      moshFrameBuffer = null;
+
+      // 누적 변형 스냅샷 관리
+      if (!sessionData[sid].moshSteps) sessionData[sid].moshSteps = [];
+      moshSteps = sessionData[sid].moshSteps;
+
+      // 현재 적용중인 변형 이미지(캔버스)
+      let persistentImage = null;
+
+      // 변형 애니메이션 후, 해당 결과를 누적
+      async function doMoshAnimation(level) {
+        let frames = 3; // 0.3초, 약 3프레임
+        let tempCanvas = document.createElement('canvas');
+        tempCanvas.width = 260; tempCanvas.height = 260;
+        let tempCtx = tempCanvas.getContext('2d');
+        tempCtx.drawImage(video, 0, 0, 260, 260);
+        for (let f=0; f<frames; ++f) {
+          applyFragmentedGlitch(tempCtx, tempCanvas, level, null);
+          await sleep(100);
+        }
+        // 누적 이미지 저장
+        persistentImage = new Image();
+        persistentImage.src = tempCanvas.toDataURL("image/png");
+        moshSteps[level-1] = persistentImage.src;
+        sessionData[sid].moshSteps = moshSteps;
+      }
+
+      // 슬로우모션 영상+누적 변형
+      let lastMoshLevel = moshLevel;
+      function drawMoshFrame() {
+        if (video.paused || video.ended) return;
+        ctx.clearRect(0,0,260,260);
+        ctx.save();
+        ctx.globalAlpha = 1;
+        ctx.drawImage(video, 0, 0, 260, 260);
+        ctx.restore();
+        // 누적된 변형 이미지가 있으면 덮어쓰기
+        if (moshLevel > 0 && moshSteps[moshLevel-1]) {
+          let img = new window.Image();
+          img.onload = ()=>{
+            ctx.clearRect(0,0,260,260);
+            ctx.drawImage(img, 0, 0, 260, 260);
+          };
+          img.src = moshSteps[moshLevel-1];
+        }
+        // 마지막 문제 직전이면 엽서용 이미지 저장
+        if (idx === bQuestions.length-1 && moshSteps[moshLevel-1]) {
+          sessionData[sid].lastMoshImage = moshSteps[moshLevel-1];
+        }
+        setTimeout(drawMoshFrame, 140); // slow motion
+      }
+      video.onplay = ()=>{
+        video.playbackRate = 0.5;
+        drawMoshFrame();
+      };
+      video.play();
+
+      document.getElementById('b-next').onclick = async ()=>{
+        let v = document.getElementById('b-answer').value.trim();
+        if (!v) return alert("답변을 입력해 주세요.");
+        bAnswers[idx] = v;
+        sessionData[sid].bAnswers = bAnswers;
+        let correct = v === sessionData[sid].aAnswers[idx];
+        if (!correct) {
+          sessionData[sid].moshLevel = (sessionData[sid].moshLevel||0)+1;
+          await doMoshAnimation(sessionData[sid].moshLevel); // 변형 애니메이션+누적
+        }
+        // 다음 문제로 이동
+        if (idx < bQuestions.length-1) {
+          quizIdx = idx+1;
+          state.page = 'b-quiz';
+          render();
+        } else {
+          // 마지막: 엽서용 이미지 캡처(마지막 변형 상태)
+          setTimeout(()=>{
+            let lastImg = sessionData[sid].lastMoshImage;
+            if (!lastImg && moshSteps.length>0) lastImg = moshSteps[moshSteps.length-1];
+            if (!lastImg) {
+              let tempCanvas = document.createElement('canvas');
+              tempCanvas.width = 260; tempCanvas.height = 260;
+              let tempCtx = tempCanvas.getContext('2d');
+              tempCtx.drawImage(video, 0, 0, 260, 260);
+              lastImg = tempCanvas.toDataURL("image/png");
+            }
+            sessionData[sid].distortedPhoto = lastImg;
+            state.page = 'b-epilogue';
+            render();
+          }, 500);
+        }
+      };
+    }
+
+    // --- Datamosh/Glitch: 블록 쉬프트, 파편화, 모자이크, 노이즈(영상 data mosh magic 참고) ---
+    function applyFragmentedGlitch(ctx, canvas, intensity, prevBuffer) {
+      // 1. 블록 파편화/쉬프트
+      for (let i = 0; i < 8 + intensity*3; i++) {
+        let blockW = 12 + Math.random() * (20+intensity*2);
+        let blockH = 16 + Math.random() * (32+intensity*3);
+        let x = Math.floor(Math.random() * (canvas.width - blockW));
+        let y = Math.floor(Math.random() * (canvas.height - blockH));
+        let dx = x + (Math.random() - 0.5) * (15 + intensity*6);
+        let dy = y + (Math.random() - 0.5) * (16 + intensity*6);
+        let block = ctx.getImageData(x, y, blockW, blockH);
+        ctx.putImageData(block, dx, dy);
+      }
+      // 2. 픽셀 파편화/노이즈
+      let imageData = ctx.getImageData(0,0,canvas.width,canvas.height);
+      for (let i=0; i<imageData.data.length; i+=4) {
+        if (Math.random()<0.02*intensity) {
+          let n = (Math.random()-0.5)*30*intensity;
+          imageData.data[i] += n;
+          imageData.data[i+1] += n;
+          imageData.data[i+2] += n;
+        }
+      }
+      ctx.putImageData(imageData,0,0);
+      // 3. 블록 모자이크(부분적)
+      let mosaicSize = 10 + Math.floor(Math.random()*8);
+      imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+      for (let y = 0; y < canvas.height; y += mosaicSize) {
+        for (let x = 0; x < canvas.width; x += mosaicSize) {
+          if (Math.random() < 0.05 + intensity*0.03) {
+            let r=0, g=0, b=0, count=0;
+            for (let dy=0; dy<mosaicSize; dy++) {
+              for (let dx=0; dx<mosaicSize; dx++) {
+                let px = x+dx, py = y+dy;
+                if (px<canvas.width && py<canvas.height) {
+                  let idx = (py*canvas.width+px)*4;
+                  r += imageData.data[idx];
+                  g += imageData.data[idx+1];
+                  b += imageData.data[idx+2];
+                  count++;
+                }
+              }
+            }
+            if (count>0) {
+              r = r/count + Math.random()*30-15;
+              g = g/count + Math.random()*30-15;
+              b = b/count + Math.random()*30-15;
+              for (let dy=0; dy<mosaicSize; dy++) {
+                for (let dx=0; dx<mosaicSize; dx++) {
+                  let px = x+dx, py = y+dy;
+                  if (px<canvas.width && py<canvas.height) {
+                    let idx = (py*canvas.width+px)*4;
+                    imageData.data[idx] = r;
+                    imageData.data[idx+1] = g;
+                    imageData.data[idx+2] = b;
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+      ctx.putImageData(imageData, 0, 0);
+    }
+
+   function renderBEpilogue() {
+  let sid = currentSessionId;
+  let userName = sessionData[sid].aAnswers[0]; // 첫 번째 질문의 답변(이름)
+  let epilogueLines = getEpilogueLines(userName); // 동적으로 생성
+  
+  let idx = state.epiIdx || 0;
+  let html = `<div class="sub-text" id="epilogue-line"></div>`;
+  
+  // 처음 두 질문에는 네/아니오 버튼 추가
+  if (idx === 0 || idx === 1) {
+    html += `
+      <div style="display: flex; gap: 1vw; margin-top: 2vw; justify-content: center;">
+        <button class="btn" id="yes-btn">네</button>
+        <button class="btn" id="no-btn">아니오</button>
+      </div>
+    `;
+  }
+  
+  // 세 번째 질문(idx === 2)일 때 텍스트 입력칸도 함께 표시
+  if (idx === 2) {
+    html += `
+      <input type="text" id="b-comment" placeholder="짧은 텍스트 입력" maxlength="30" style="margin-top: 2vw;"><br>
+      <button class="btn" id="b-result" style="margin-top: 1vw;">결과 보기</button>
+    `;
+  }
+  
+  app.innerHTML = html;
+  let epilogue = document.getElementById('epilogue-line');
+  
+  if (idx < epilogueLines.length) {
+    // 처음 두 질문은 버튼 클릭으로 진행
+    if (idx === 0 || idx === 1) {
+      epilogue.innerHTML = epilogueLines[idx];
+      epilogue.classList.add('fade-in');
+      
+      // 네/아니오 버튼 이벤트 처리
+      document.getElementById('yes-btn').onclick = ()=>{
+        state.epiIdx = idx + 1;
+        renderBEpilogue();
+      };
+      
+      document.getElementById('no-btn').onclick = ()=>{
+        state.epiIdx = idx + 1;
+        renderBEpilogue();
+      };
+    } else if (idx === 2) {
+      // 세 번째 질문은 텍스트 입력칸과 함께 표시
+      epilogue.innerHTML = epilogueLines[idx];
+      epilogue.classList.add('fade-in');
+      
+      document.getElementById('b-result').onclick = ()=>{
+        let v = document.getElementById('b-comment').value.trim();
+        if (!v) return alert("짧은 텍스트를 입력해 주세요.");
+        sessionData[sid].bComment = v;
+        state.page = 'b-result'; render();
+      };
+    }
+  }
+}
+
+    function renderBResult() {
+      let sid = currentSessionId;
+      let imgData = sessionData[sid].distortedPhoto;
+      let txt = sessionData[sid].bComment;
+      app.innerHTML = `
+        <h1 class="main-title" style="margin-bottom:1vw;">엽서 다운로드</h1>
+        <div style="display:flex; flex-direction:column; align-items:center;">
+          <canvas id="postcard" width="400" height="600" style="background:#fff; border-radius:18px; margin-bottom:2vw;"></canvas>
+          <button class="btn" id="download-png">png 다운로드</button>
+          <button class="btn" id="to-home">처음으로 돌아가기</button>
+        </div>
+      `;
+      let postcard = document.getElementById('postcard');
+      let ctx2 = postcard.getContext('2d');
+      let img = new window.Image();
+      img.onload = ()=>{
+  let userName = sessionData[sid].aAnswers[0]; // 첫 번째 질문의 답변(이름)
+  
+  ctx2.clearRect(0,0,400,600);
+  ctx2.fillStyle = "#fff";
+  ctx2.fillRect(0,0,400,600);
+  ctx2.drawImage(img, 70, 60, 260, 260);
+  
+  ctx2.font = "18px 'Montserrat', 'sans-serif'";
+  ctx2.fillStyle = "#222";
+  ctx2.textAlign = "center";
+  
+  // 3줄 텍스트 중앙정렬
+  ctx2.fillText(userName, 200, 370);
+  ctx2.fillText("혹은", 200, 395);
+  ctx2.fillText(`< ${txt}의 초상 >`, 200, 420);
+};
+      img.src = imgData;
+      document.getElementById('download-png').onclick = ()=>{
+        let url = postcard.toDataURL("image/png");
+        let a = document.createElement('a');
+        a.href = url; a.download = "타인x의초상_postcard.png";
+        a.click();
+      };
+      document.getElementById('to-home').onclick = ()=>{
+        state = {page:'intro'}; render();
+      };
+    }
+
+    // --- INIT ---
+    render();
+  </script>
+</body>
+</html>
