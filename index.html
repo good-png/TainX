@@ -414,8 +414,8 @@ document.getElementById('app').addEventListener('click', function(e) {
   state.epiIdx = 0;
   app.innerHTML = `
     <div style="display:flex; flex-direction:column; align-items:center; gap:2vw;">
-      <button class="btn" id="btn-a">나의 초상을 남기고 싶다면 : a</button>
-      <button class="btn" id="btn-b">그 사람의 초상을 보고 싶다면 : b</button>
+      <button class="btn" id="btn-a">나의 초상을 남기고 싶다면 : a로 참여</button>
+      <button class="btn" id="btn-b">그 사람의 초상을 보고 싶다면 : b로 참여</button>
       <div id="b-session-box" style="display:none; flex-direction:column; align-items:center; gap:1vw; margin-top:2vw;">
         <input type="text" id="b-session-id" placeholder="세션 아이디 입력" autocomplete="off">
         <button class="btn" id="b-session-go">입장</button>
@@ -590,7 +590,7 @@ document.getElementById('app').addEventListener('click', function(e) {
           <span id="session-id-txt">${sid}</span>
           <button class="btn" id="copy-session">복사</button>
         </div>
-        <div class="sub-text" style="margin-bottom:2vw;">지인에게 세션 아이디를 전달해 퀴즈에 초대해 주세요.</div>
+        <div class="sub-text" style="margin-bottom:2vw;"> 당신의 초상이 기록되었습니다. <br><br>1.이제 상대방과 자리를 교체해주세요. <br>2.위의 세션 아이디를 복사한 후 처음으로 돌아가 b의 체험을 시작하세요.  </div>
         <button class="btn" id="to-home">처음으로 돌아가기</button>
       `;
       document.getElementById('copy-session').onclick = ()=>{
@@ -915,8 +915,8 @@ document.getElementById('app').addEventListener('click', function(e) {
   
   // 3줄 텍스트 중앙정렬
   ctx2.fillText(userName, 200, 370);
-  ctx2.fillText("혹은", 200, 395);
-  ctx2.fillText(`< ${txt}의 초상 >`, 200, 420);
+  ctx2.fillText("혹은", 200, 410);
+  ctx2.fillText(`< ${txt}의 초상 >`, 200, 450);
 };
       img.src = imgData;
       document.getElementById('download-png').onclick = ()=>{
@@ -935,3 +935,4 @@ document.getElementById('app').addEventListener('click', function(e) {
   </script>
 </body>
 </html>
+
